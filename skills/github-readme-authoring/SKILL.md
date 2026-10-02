@@ -2,10 +2,11 @@
 name: github-readme-authoring
 description: Write fact-checked GitHub READMEs in a house style.
 version: 1.0.0
-author: Omer Dahan (Omer-Dahan), Hermes Agent
+author: Omer Dahan (Omer-Dahan)
 license: MIT
 platforms: [linux, macos, windows]
 metadata:
+  # Optional, namespaced for Hermes Agent's skill registry; other agents ignore it safely.
   hermes:
     tags: [readme, documentation, github, house-style, fact-checking]
 ---
@@ -22,12 +23,16 @@ It writes documentation only: no application code, no invented features.
 - User asks for a README, repo description, badges, or "make the project page look professional".
 - An existing README is outdated, milestone-flavored, or factually wrong and needs a rewrite.
 - You need a configuration matrix, architecture overview, or deploy section derived from code.
-- Don't use for: changelogs, API references, or authoring `SKILL.md` files (use `hermes-agent-skill-authoring`).
+- Don't use for: changelogs, API references, or authoring other `SKILL.md` files — that's a
+  separate concern.
 
 ## Prerequisites
 
 - A local checkout of the target repo.
-- Hermes tools: `terminal`, `read_file`, `search_files`, `write_file`, `patch`.
+- An agent that can read files, write files, run shell commands, and apply patches — any
+  agent that follows the open `SKILL.md` convention qualifies (tool names vary; map them to
+  the steps below). The template and `scripts/check_readme.py` also work with no agent at
+  all — see the repo's README for standalone use.
 - A second agent that is **not** the author, for the verification pass (see references/verification-brief.md).
 - Facts come from the repo: manifests, config loader, entry points, deploy files, tests. Never from memory.
 
@@ -45,7 +50,8 @@ Makefile scripts/* tests/                                               # the co
 - Fact checklist: `references/fact-inventory.md`
 - Verifier brief: `references/verification-brief.md`
 - Lint the result: `python3 scripts/check_readme.py README.md --repo .`
-- Publish the *skill* (not the README): `hermes skills publish <skill-dir> --to github --repo <owner/repo>`
+- Publish the *skill* (not the README) by pushing this directory to a repo. If you use Hermes
+  Agent, its tap command can install straight from that repo: `hermes skills tap add <owner/repo>`.
 
 ## Procedure
 

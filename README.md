@@ -4,21 +4,21 @@
 
 ### github-readme-authoring
 
-**A Hermes skill that writes fact-checked GitHub READMEs in a fixed house style.**<br>
+**An agent skill for writing GitHub READMEs that are actually true.**<br>
 Every claim is sourced to a `file:line` in the repo, linted by a script, then re-checked
 by a second, independent model before it ships. It writes documentation only — no
 application code, no invented features.
 
 <br>
 
-<a href="#-quick-start"><img src="https://img.shields.io/badge/🚀_Quick_Start-06B6D4?style=for-the-badge&logoColor=white" alt="Quick Start"></a>
+<a href="#-compatibility"><img src="https://img.shields.io/badge/🔌_Compatibility-06B6D4?style=for-the-badge&logoColor=white" alt="Compatibility"></a>
 <a href="#-features"><img src="https://img.shields.io/badge/✨_Features-D98324?style=for-the-badge&logoColor=white" alt="Features"></a>
 <a href="#-how-it-works"><img src="https://img.shields.io/badge/🧠_How_It_Works-0D1117?style=for-the-badge&logoColor=white" alt="How It Works"></a>
 <a href="#-testing"><img src="https://img.shields.io/badge/🧪_Testing-22C55E?style=for-the-badge&logoColor=white" alt="Testing"></a>
 
 <br><br>
 
-![Skill](https://img.shields.io/badge/Hermes-Skill-0088CC?style=flat-square)
+![Skill](https://img.shields.io/badge/Agent-Skill-0088CC?style=flat-square)
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
@@ -33,9 +33,10 @@ application code, no invented features.
 <td valign="top" width="33%">
 
 **Getting Started**
+- [🔌 Compatibility](#-compatibility)
 - [✨ Features](#-features)
 - [🧠 How It Works](#-how-it-works)
-- [🚀 Quick Start](#-quick-start)
+- [📦 Installation](#-installation)
 
 </td>
 <td valign="top" width="33%">
@@ -54,6 +55,18 @@ application code, no invented features.
 </td>
 </tr>
 </table>
+
+---
+
+## 🔌 Compatibility
+
+This is a plain agent skill: a `SKILL.md` procedure, a template, two reference docs, and a
+standalone lint script. Nothing in those files is tied to one vendor.
+
+- **Any agent that reads `SKILL.md`** — Hermes Agent, Claude Code, and similar tools — can load
+  `skills/github-readme-authoring` and follow the procedure.
+- **No agent at all.** Copy `templates/readme-house-style.md`, fill it in by hand, and run
+  `scripts/check_readme.py` yourself. See [Installation](#-installation) below.
 
 ---
 
@@ -125,22 +138,37 @@ repo files ──▶ fact inventory ──▶ draft (template) ──▶ check_r
 
 ---
 
-## 🚀 Quick Start
+## 📦 Installation
 
-Install the skill into Hermes from this repo:
+Pick whichever fits your setup — none of them is the "official" way.
+
+**A. Copy it into your agent's skills folder**
+
+```bash
+cp -r skills/github-readme-authoring /path/to/your/agent/skills/
+```
+
+Any agent that discovers skills by reading `SKILL.md` files will pick it up from there. The
+next time you ask it for a README, badges, or "make this repo's page look professional", it
+applies the procedure in `SKILL.md`.
+
+**B. Hermes Agent tap**
+
+If you use Hermes Agent, its tap command installs straight from this repo:
 
 ```bash
 hermes skills tap add Omer-Dahan/readme-skill
 ```
 
-This pulls `skills/github-readme-authoring` into your skill set. The next time you ask an
-agent for a README, badges, or a "make this repo's page look professional", it applies the
-procedure in `SKILL.md`.
+**C. Standalone, no agent**
 
-To lint a README by hand, without the full skill flow:
+Clone the repo and use the template and linter directly:
 
 ```bash
-python3 skills/github-readme-authoring/scripts/check_readme.py README.md --repo .
+git clone https://github.com/Omer-Dahan/readme-skill
+cp readme-skill/skills/github-readme-authoring/templates/readme-house-style.md README.md
+# fill it in by hand, then:
+python3 readme-skill/skills/github-readme-authoring/scripts/check_readme.py README.md --repo .
 ```
 
 ---
@@ -189,9 +217,9 @@ readme-skill/
 - **`check_readme.py` approximates GitHub's heading-anchor rules**, including the emoji
   variation-selector quirk described in `SKILL.md`'s pitfalls section. It is not GitHub's own
   slugger, so an edge case can still slip through.
-- **Written for Hermes-style agent tooling** (`terminal`, `read_file`, `search_files`,
-  `write_file`, `patch`). Using it with another agent framework means mapping those tool
-  names to its equivalents.
+- **The procedure assumes generic file read/write/search/patch actions.** Every agent names
+  these differently; following `SKILL.md` with a given agent means mapping those steps to its
+  actual tool names.
 
 ---
 
