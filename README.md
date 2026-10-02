@@ -227,9 +227,20 @@ python3 readme-skill/skills/github-readme-authoring/scripts/check_readme.py READ
 
 ## 🧪 Testing
 
-`tests/test_check_readme.py` imports `check_readme.py` directly and exercises it against a
-known-bad README (dead anchor, local path, placeholder token, license badge with no
-`LICENSE` file) and a clean one, asserting zero findings on the clean case.
+Two test files cover the skill's one script from different angles:
+
+- **`tests/test_check_readme.py`** imports `check_readme.py` directly and exercises it against
+  a known-bad README (dead anchor, local path, placeholder token, license badge with no
+  `LICENSE` file) and a clean one, asserting zero findings on the clean case. It also unit-tests
+  the slugifier (including the emoji variation-selector quirk) and the superlative/count regexes
+  directly.
+- **`tests/test_shipped_docs.py`** is the regression test that would have caught a real bug:
+  it runs `check_readme.py` against every markdown file this repo actually ships — `README.md`,
+  the two `references/` docs, `SKILL.md`, and the README template (with its outer ```` ``` ````
+  fence stripped so the anchors inside it are actually linted, not skipped as "inside a code
+  block") — and asserts each has zero findings, or only the specific findings that are expected
+  and named as such (e.g. `SKILL.md`'s Pitfalls section intentionally names forbidden tokens as
+  examples).
 
 ```bash
 uv sync             # installs the dev dependency group (pytest) from pyproject.toml
@@ -259,7 +270,8 @@ readme-skill/
 │       └── scripts/
 │           └── check_readme.py             # lints a README for the failure modes above
 └── tests/
-    └── test_check_readme.py                # pytest coverage for check_readme.py
+    ├── test_check_readme.py                # pytest coverage for check_readme.py
+    └── test_shipped_docs.py                # regression test: lints every markdown file this repo ships
 ```
 
 ---
