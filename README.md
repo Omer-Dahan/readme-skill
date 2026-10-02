@@ -198,3 +198,5 @@ readme-skill/
 ## 📜 License & Credits
 
 MIT, see [LICENSE](LICENSE). Author: Omer Dahan ([@Omer-Dahan](https://github.com/Omer-Dahan)).
+
+Repo: [github.com/Omer-Dahan/readme-skill](https://github.com/Omer-Dahan/readme-skill)
