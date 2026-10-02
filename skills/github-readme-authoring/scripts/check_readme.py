@@ -28,7 +28,7 @@ SUPERLATIVE_RE = re.compile(
     r"zero[- ]downtime|enterprise[- ]grade|revolutionary|cutting[- ]edge)\b",
     re.IGNORECASE,
 )
-COUNT_RE = re.compile(r"\b(\d{2,5})\s+(tests?|files?|users?|downloads?|stars?|contributors?)\b", re.IGNORECASE)
+COUNT_RE = re.compile(r"\b(\d+)\s+(tests?|files?|users?|downloads?|stars?|contributors?)\b", re.IGNORECASE)
 HEDGE_RE = re.compile(r"as of this writing|at the time of writing|currently|approx|~", re.IGNORECASE)
 BADGE_ANCHOR_RE = re.compile(r'<a href="#([^"]+)"')
 

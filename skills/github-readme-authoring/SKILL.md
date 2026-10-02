@@ -38,8 +38,12 @@ It writes documentation only: no application code, no invented features.
 
 ## Quick Reference
 
+All paths below (`templates/...`, `references/...`, `scripts/check_readme.py`) are relative to
+*this skill's own directory* (`skills/github-readme-authoring/`), not the target repo you are
+writing a README for — resolve them against wherever this skill was installed.
+
 ```bash
-# Fact inventory sources (adapt to the stack)
+# Fact inventory sources, read from the TARGET repo (adapt to the stack)
 pyproject.toml package.json Cargo.toml go.mod composer.json setup.cfg   # name, version, deps, license, entry points
 .env.example  config/*.py  internal/config/*.go                       # every configuration variable + real default
 Dockerfile* docker-compose* deploy/* .github/workflows/*               # how it is actually run and shipped
@@ -49,9 +53,11 @@ Makefile scripts/* tests/                                               # the co
 - Template: `templates/readme-house-style.md`
 - Fact checklist: `references/fact-inventory.md`
 - Verifier brief: `references/verification-brief.md`
-- Lint the result: `python3 scripts/check_readme.py README.md --repo .`
+- Lint the result: `python3 scripts/check_readme.py README.md --repo .` (`check_readme.py` is this
+  skill's own linter; `README.md --repo .` point at the target repo being documented)
 - Publish the *skill* (not the README) by pushing this directory to a repo. If you use Hermes
-  Agent, its tap command can install straight from that repo: `hermes skills tap add <owner/repo>`.
+  Agent, install it straight from that repo with `hermes skills install <owner/repo>/<path/to/skill>`;
+  `hermes skills tap add <owner/repo>` only registers the repo as a skill source, it does not install.
 
 ## Procedure
 

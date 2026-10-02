@@ -1,0 +1,9 @@
+[project]
+name = "readme-skill"
+version = "1.0.0"
+description = "Agent skill for writing fact-checked GitHub READMEs in a house style."
+license = "MIT"
+requires-python = ">=3.11"
+
+[dependency-groups]
+dev = ["pytest>=8"]

@@ -19,7 +19,7 @@ not exist in the repo. A surviving placeholder is a lint failure.
 <a href="#-quick-start"><img src="https://img.shields.io/badge/🚀_Quick_Start-06B6D4?style=for-the-badge&logoColor=white" alt="Quick Start"></a>
 <a href="#-features"><img src="https://img.shields.io/badge/✨_Features-D98324?style=for-the-badge&logoColor=white" alt="Features"></a>
 <a href="#-architecture"><img src="https://img.shields.io/badge/🧠_Architecture-0D1117?style=for-the-badge&logoColor=white" alt="Architecture"></a>
-<a href="#-deploying-to-the-server"><img src="https://img.shields.io/badge/⚙️_Deploy-22C55E?style=for-the-badge&logoColor=white" alt="Deploy"></a>
+<a href="#️-deploying-to-the-server"><img src="https://img.shields.io/badge/⚙️_Deploy-22C55E?style=for-the-badge&logoColor=white" alt="Deploy"></a>
 
 <br><br>
 
@@ -47,7 +47,7 @@ not exist in the repo. A surviving placeholder is a lint failure.
 <td valign="top" width="33%">
 
 **Operations**
-- [⚙️ Deploying to the Server](#-deploying-to-the-server)
+- [⚙️ Deploying to the Server](#️-deploying-to-the-server)
 - [🧱 Project Structure](#-project-structure)
 - [🔧 Configuration Matrix](#-configuration-matrix)
 

@@ -119,3 +119,51 @@ def test_clean_readme_has_zero_findings(repo, capsys):
 
     assert exit_code == 0
     assert "clean:" in capsys.readouterr().out
+
+
+def test_small_unhedged_count_is_flagged(repo, capsys):
+    """COUNT_RE used to require 2-5 digits, missing single-digit counts like "3 tests"."""
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\nShipped with 3 tests.\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "unhedged-count" in capsys.readouterr().out
+
+
+def test_hedged_count_is_not_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\nAs of this writing, 3 tests pass.\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "unhedged-count" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize(
+    "heading,expected_slug",
+    [
+        ("Features", "features"),
+        ("✨ Features", "-features"),
+        ("⚙️ Deploying to the Server", "️-deploying-to-the-server"),
+        ("⚠️ Known Limitations", "️-known-limitations"),
+    ],
+)
+def test_slugify_handles_emoji_and_variation_selectors(heading, expected_slug):
+    """Plain emoji (no variation selector) are dropped entirely by GitHub's slugger,
+    leaving a leading hyphen; emoji with a U+FE0F variation selector keep that
+    invisible character in the slug. See SKILL.md Pitfalls item 5.
+    """
+    assert check_readme.slugify(heading) == expected_slug
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    ["blazing fast", "ultra-fast", "ultrafast", "zero-downtime", "zero downtime", "cutting-edge"],
+)
+def test_superlative_re_matches_known_phrases(phrase):
+    assert check_readme.SUPERLATIVE_RE.search(phrase)
+
+
+def test_superlative_re_does_not_match_plain_text():
+    assert check_readme.SUPERLATIVE_RE.search("a fast, reliable script") is None

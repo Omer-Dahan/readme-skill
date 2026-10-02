@@ -65,8 +65,9 @@ standalone lint script. Nothing in those files is tied to one vendor.
 
 - **Any agent that reads `SKILL.md`** — Hermes Agent, Claude Code, and similar tools — can load
   `skills/github-readme-authoring` and follow the procedure.
-- **No agent at all.** Copy `templates/readme-house-style.md`, fill it in by hand, and run
-  `scripts/check_readme.py` yourself. See [Installation](#-installation) below.
+- **No agent at all.** Copy `skills/github-readme-authoring/templates/readme-house-style.md`,
+  fill it in by hand, and run `skills/github-readme-authoring/scripts/check_readme.py` yourself.
+  See [Installation](#-installation) below.
 
 ---
 
@@ -85,14 +86,14 @@ Every published claim is tied to a source location.
 
 ### 🏛️ Fixed House Style
 Centered header, badge navigation, three-column feature tables, and a set section
-order — one template (`templates/readme-house-style.md`), not a blank page.
+order — one template (`skills/github-readme-authoring/templates/readme-house-style.md`), not a blank page.
 
 </td>
 <td width="33%" valign="top">
 
 ### 🧹 Self-Linting
-`scripts/check_readme.py` catches dead anchors, machine-local paths, placeholder
-tokens, unhedged counts, unbacked superlatives, and a license badge with no
+`skills/github-readme-authoring/scripts/check_readme.py` catches dead anchors, machine-local
+paths, placeholder tokens, unhedged counts, unbacked superlatives, and a license badge with no
 matching `LICENSE` file.
 
 </td>
@@ -101,8 +102,8 @@ matching `LICENSE` file.
 <td width="33%" valign="top">
 
 ### 🕵️ Independent Verification
-`references/verification-brief.md` hands the draft to a second, different model
-that checks it against the code and flags unsupported or omitted claims.
+`skills/github-readme-authoring/references/verification-brief.md` hands the draft to a second,
+different model that checks it against the code and flags unsupported or omitted claims.
 
 </td>
 <td width="33%" valign="top">
@@ -117,6 +118,52 @@ not from `.env.example` comments, which drift from the code.
 ### 🚫 No Invented Features
 Documents what the code does. A feature the product promises but doesn't
 implement gets flagged for a code fix, not written into the README.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### ⚓ Anchor Slug Fidelity
+`check_readme.py`'s slugifier reproduces GitHub's heading-anchor rules, including the
+invisible U+FE0F variation-selector quirk on emoji headings.
+
+</td>
+<td width="33%" valign="top">
+
+### 🧩 Agent-Agnostic Procedure
+`SKILL.md` names generic read/write/search/patch steps, not one vendor's tool calls — Hermes
+Agent, Claude Code, or a human following it by hand all qualify.
+
+</td>
+<td width="33%" valign="top">
+
+### 🪤 Documented Pitfalls Library
+Eleven named failure modes in `SKILL.md` — backwards config docs, drifting counts, unbacked
+superlatives — each tied to a real cause, not a style guess.
+
+</td>
+</tr>
+<tr>
+<td width="33%" valign="top">
+
+### 📋 Omission-First Completeness Pass
+`skills/github-readme-authoring/references/fact-inventory.md` step 7 enumerates the full public
+surface and ticks it against the draft, since omission is the most common accuracy failure.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔄 Refresh, Don't Append
+Stale status or milestone prose is deleted outright instead of being left under a new section
+heading next to outdated claims.
+
+</td>
+<td width="33%" valign="top">
+
+### 🚚 Docs-Only Delivery
+The final commit touches only documentation (plus a LICENSE fix if one was required), reported
+with the commit hash and the exact corrections made.
 
 </td>
 </tr>
@@ -152,13 +199,18 @@ Any agent that discovers skills by reading `SKILL.md` files will pick it up from
 next time you ask it for a README, badges, or "make this repo's page look professional", it
 applies the procedure in `SKILL.md`.
 
-**B. Hermes Agent tap**
+**B. Hermes Agent install**
 
-If you use Hermes Agent, its tap command installs straight from this repo:
+If you use Hermes Agent, its `install` command fetches the skill directly from this repo —
+the identifier is the GitHub path down to the skill directory:
 
 ```bash
-hermes skills tap add Omer-Dahan/readme-skill
+hermes skills install Omer-Dahan/readme-skill/skills/github-readme-authoring
 ```
+
+`hermes skills tap add Omer-Dahan/readme-skill` is a separate, optional step: it only
+registers this repo as a skill *source* for `hermes skills browse`/`search`, it does not
+install anything by itself.
 
 **C. Standalone, no agent**
 
@@ -180,10 +232,12 @@ known-bad README (dead anchor, local path, placeholder token, license badge with
 `LICENSE` file) and a clean one, asserting zero findings on the clean case.
 
 ```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install pytest
-pytest tests/
+uv sync             # installs the dev dependency group (pytest) from pyproject.toml
+uv run pytest tests/
 ```
+
+No `uv`? Any Python 3.11+ environment works: `python3 -m venv .venv && source .venv/bin/activate &&
+pip install pytest && pytest tests/`.
 
 ---
 
@@ -193,6 +247,7 @@ pytest tests/
 readme-skill/
 ├── LICENSE                                 # MIT
 ├── README.md                               # this file
+├── pyproject.toml                          # requires-python, dev dependency group (pytest)
 ├── skills/
 │   └── github-readme-authoring/
 │       ├── SKILL.md                        # the procedure an agent follows
