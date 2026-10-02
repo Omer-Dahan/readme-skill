@@ -8,7 +8,6 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [readme, documentation, github, house-style, fact-checking]
-    related_skills: [grounded-citations, github-repo-management]
 ---
 
 # GitHub README Authoring Skill
@@ -103,17 +102,17 @@ Makefile scripts/* tests/                                               # the co
    does nothing. `scripts/check_readme.py` reproduces GitHub's slug rules (verified against the
    `/repos/{owner}/{repo}/readme` HTML) — run it, and when in doubt add an explicit
    `<a id="plain-ascii"></a>` before the heading and link to that.
-5. **Never document a feature the code does not implement.** If the *product itself* promises it to
+6. **Never document a feature the code does not implement.** If the *product itself* promises it to
    users (menu text, help copy), fix the promise in code — do not enshrine it in the README.
-6. **No unverifiable superlatives.** "Blazing fast", "ultra-fast", "zero-downtime", "maximum
+7. **No unverifiable superlatives.** "Blazing fast", "ultra-fast", "zero-downtime", "maximum
    throughput" — replace with the measured number, or with an accurate statement of the mechanism.
-7. **A license badge needs a `LICENSE` file.** If it is missing, report it; don't silently ship the badge.
-8. **Omission is the most common accuracy failure.** Enumerate the commands, hard limits, and
+8. **A license badge needs a `LICENSE` file.** If it is missing, report it; don't silently ship the badge.
+9. **Omission is the most common accuracy failure.** Enumerate the commands, hard limits, and
    user-visible behaviors the code exposes; readers notice missing capabilities more than wrong
    adjectives.
-9. **Refreshing beats appending.** Delete stale status/milestone prose that no longer describes the
-   shipped system instead of leaving it under a new section.
-10. **Do not let the author verify.** Style and facts drift in ways the author cannot see; the second
+10. **Refreshing beats appending.** Delete stale status/milestone prose that no longer describes the
+    shipped system instead of leaving it under a new section.
+11. **Do not let the author verify.** Style and facts drift in ways the author cannot see; the second
     agent is the only reliable check.
 
 ## Verification
