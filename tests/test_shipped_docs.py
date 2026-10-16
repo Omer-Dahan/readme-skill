@@ -42,6 +42,7 @@ def _kind_and_line(finding: str) -> tuple[str, int]:
         REPO_ROOT / "README.md",
         SKILL_DIR / "references" / "fact-inventory.md",
         SKILL_DIR / "references" / "verification-brief.md",
+        SKILL_DIR / "references" / "render-check.md",
     ],
     ids=lambda p: str(p.relative_to(REPO_ROOT)),
 )
@@ -57,9 +58,9 @@ def test_skill_md_has_only_the_known_self_referential_findings() -> None:
     ships.
     """
     expected = {
-        ("placeholder", 71),  # names the forbidden `TODO` placeholder token
-        ("local-path", 109),  # names the forbidden /tmp and /home/<user> example paths
-        ("superlative", 119),  # lists the forbidden superlative words
+        ("placeholder", 72),  # names the forbidden `TODO` placeholder token
+        ("local-path", 119),  # names the forbidden /tmp and /home/<user> example paths
+        ("superlative", 129),  # lists the forbidden superlative words
     }
     actual = {_kind_and_line(f) for f in _lint(SKILL_DIR / "SKILL.md")}
     assert actual == expected

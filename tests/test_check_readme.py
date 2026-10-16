@@ -167,3 +167,151 @@ def test_superlative_re_matches_known_phrases(phrase):
 
 def test_superlative_re_does_not_match_plain_text():
     assert check_readme.SUPERLATIVE_RE.search("a fast, reliable script") is None
+
+
+def test_merged_comment_line_in_fence_is_flagged(repo, capsys):
+    """A repo-wide dash sweep can join two comment lines into one that still has two
+    comment markers; the old linter skipped fenced code entirely and missed this."""
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n```python\n# as of this writing - # the count grows over time\n```\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "merged-line" in capsys.readouterr().out
+
+
+def test_badge_with_flag_emoji_is_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n![Lang](https://img.shields.io/badge/🇮🇱_Hebrew-blue)\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "badge-render" in capsys.readouterr().out
+
+
+def test_badge_with_hebrew_label_is_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n![Lang](https://img.shields.io/badge/עברית-blue)\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "badge-render" in capsys.readouterr().out
+
+
+def test_closed_ascii_box_with_emoji_is_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\n```\n│ 🌕 moon │\n```\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "wide-box" in capsys.readouterr().out
+
+
+def test_directory_tree_line_is_not_flagged_as_wide_box(repo, capsys):
+    """A directory tree drawn with box-drawing characters has no right border to
+    align against, so it must not be mistaken for a closed box."""
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n```\nproject/\n├── foo/\n└── bar/\n```\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "wide-box" not in capsys.readouterr().out
+
+
+def test_hebrew_mixed_with_digits_and_no_directional_mark_is_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\n```\nמהירות: 5.4MB/s\n```\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "rtl-hazard" in capsys.readouterr().out
+
+
+def test_hebrew_mixed_with_digits_and_lrm_is_clean(repo, capsys):
+    """A U+200E (LRM) right before the digits is the real formatter's own marker,
+    not a hazard."""
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\n```\nמהירות:‎ 5.4MB/s\n```\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "rtl-hazard" not in capsys.readouterr().out
+
+
+def test_hebrew_label_with_parenthesised_ascii_tail_is_clean(repo, capsys):
+    """A parenthesised ASCII run right after a Hebrew label is left in place by the
+    bidi algorithm's bracket-pair rule, so it is not a mixing hazard."""
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\n```\nתווית: (5.4MB/s)\n```\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "rtl-hazard" not in capsys.readouterr().out
+
+
+def test_hebrew_first_line_ending_in_colon_is_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\nשלום עולם:\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "rtl-punctuation" in capsys.readouterr().out
+
+
+def test_hebrew_first_line_ending_in_ellipsis_is_clean(repo, capsys):
+    """An ellipsis-terminated status label is the product's own text, not punctuation
+    displaced by the bidi algorithm."""
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\nמוריד...\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "rtl-punctuation" not in capsys.readouterr().out
+
+
+def test_two_different_test_counts_are_a_count_conflict(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\nAs of this writing, 24 passing.\n\nActually 30 passing.\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "count-conflict" in capsys.readouterr().out
+
+
+def test_tests_flag_mismatch_is_a_stale_count(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text("# Demo\n\nAs of this writing, 24 passing.\n", encoding="utf-8")
+
+    check_readme.main([str(readme), "--repo", str(repo), "--tests", "30"])
+
+    assert "stale-count" in capsys.readouterr().out
+
+
+def test_link_to_percent_encoded_hebrew_heading_resolves(repo, capsys):
+    """GitHub percent-encodes non-ASCII fragments; the linter must decode before
+    comparing against the slugified heading or it reports a false dead-anchor."""
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n## עברית כותרת\n\n"
+        "See [here](#%D7%A2%D7%91%D7%A8%D7%99%D7%AA-%D7%9B%D7%95%D7%AA%D7%A8%D7%AA)\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "dead-anchor" not in capsys.readouterr().out

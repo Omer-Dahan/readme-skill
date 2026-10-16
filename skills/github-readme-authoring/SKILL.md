@@ -53,8 +53,9 @@ Makefile scripts/* tests/                                               # the co
 - Template: `templates/readme-house-style.md`
 - Fact checklist: `references/fact-inventory.md`
 - Verifier brief: `references/verification-brief.md`
-- Lint the result: `python3 scripts/check_readme.py README.md --repo .` (`check_readme.py` is this
-  skill's own linter; `README.md --repo .` point at the target repo being documented)
+- Render check (per-character measurement on the live page): `references/render-check.md`
+- Lint the result: `python3 scripts/check_readme.py README.md --repo .` (accuracy, fenced-code and
+  rendering checks; add `--tests <measured>` to pin every test count to a number you just ran)
 - Publish the *skill* (not the README) by pushing this directory to a repo. If you use Hermes
   Agent, install it straight from that repo with `hermes skills install <owner/repo>/<path/to/skill>`;
   `hermes skills tap add <owner/repo>` only registers the repo as a skill source, it does not install.
@@ -74,11 +75,20 @@ Makefile scripts/* tests/                                               # the co
    short consequence note for the settings that actually change behavior.
 5. **Self-lint.** Run `scripts/check_readme.py` and fix every finding. *Done when* zero findings:
    no machine-local paths, no dead anchors, no placeholder tokens, no unhedged counts, no
-   license badge without a LICENSE file, every relative link resolves in the repo.
-6. **Independent verification.** Hand the README plus `references/verification-brief.md` to a
+   license badge without a LICENSE file, every relative link resolves in the repo, no comment line
+   that a sweep joined inside a code fence, no Hebrew mixed with digits without a directional mark,
+   no Hebrew line whose trailing punctuation lands on the left, no ASCII box or badge holding a
+   glyph that is not one cell wide.
+6. **Render check.** Open the page (local preview, or wherever it renders once pushed) and *measure*
+   what the lint cannot see: for every block holding Hebrew, emoji, or an ASCII box, read the
+   per-character x positions and confirm the visual order matches the intended text and that all
+   borders share one x coordinate; read each badge's rendered width against the string's natural
+   width. *Done when* the measurements are clean — a Hebrew block that looks correct in the editor
+   is routinely scrambled on the page (measured: `⚡ מהירות: 5.4MB/s` displaying as `⚡ 5.4 :מהירותMB/s`).
+7. **Independent verification.** Hand the README plus `references/verification-brief.md` to a
    **different model than the author**. Fix every "no evidence" finding, then re-verify. *Done when*
    the verifier returns no unsupported claim — including claims the README omits that the code exposes.
-7. **Deliver.** Commit README (and any LICENSE/badge fix) as a docs-only commit; report the commit
+8. **Deliver.** Commit README (and any LICENSE/badge fix) as a docs-only commit; report the commit
    hash plus the exact list of corrections made in step 6.
 
 ## House Style Contract
@@ -126,6 +136,57 @@ Makefile scripts/* tests/                                               # the co
     shipped system instead of leaving it under a new section.
 11. **Do not let the author verify.** Style and facts drift in ways the author cannot see; the second
     agent is the only reliable check.
+12. **A text sweep is blind inside code fences.** A repo-wide dash replacement (a "no em dash" house
+    rule) merges two lines whenever the first ends with the dash: `# ... as of this writing - #     the
+    count grows over time ...` reads plausibly, passes an old linter that skips fenced code, and is
+    wrong. After any character sweep, grep the fenced content for lines carrying two comment markers,
+    and re-read the fences by eye.
+13. **Never hand-type what the program prints.** A hand-typed UI mock drops the invisible directional
+    marks the real formatter emits (an LRM after each Hebrew label), so the mock renders differently
+    from the product: measured on the rendered page, a line typed as `⚡ מהירות: 5.4MB/s` displayed as
+    `⚡ 5.4 :מהירותMB/s`, and `(03:45)` displayed with mirrored parentheses. Generate the block from
+    the code, paste the bytes verbatim, and note above it where it came from.
+14. **Emoji are not one monospace cell.** An ASCII box padded by character count drifts: measured
+    17.0px for a moon emoji against 8.17px for one cell, so the right border landed 7px short and the
+    emoji line overshot it by 7px. Drop the borders, or pad by measured width.
+15. **Badges must be ASCII.** Windows has no glyph for a regional-indicator flag, so `🇮🇱` renders as
+    the letters "IL"; and shields.io sizes the label with its own measurement and force-fits it with
+    `textLength` (the Hebrew UI badge: 79px for a 46px string). Describe the feature in ASCII
+    (`UI-Hebrew_RTL`).
+16. **Verify mechanism claims, not just feature claims.** "Formatted with explicit bi-di RTL/LTR
+    embeddings" survived the milestone that deleted those embedding characters, because verification
+    read the tests that pin the visible text instead of the formatter's module docstring and its
+    output lines. When a claim names a mechanism, open the code that implements the mechanism.
+17. **Hebrew is a rendering problem, not only a translation problem.** Every rule and every measured
+    failure is in the "Hebrew and RTL content" section below; read it before writing a page that
+    contains a single Hebrew word, and measure the page afterwards.
+
+## Hebrew and RTL content (rules from measured failures)
+
+Hebrew text on a Markdown page is laid out by the Unicode bidi algorithm, not by the character order in
+the file, and most Markdown hosts give every paragraph a left-to-right base direction. Six rules
+follow; each was measured on a rendered page (see `references/render-check.md`).
+
+1. **Generate a Hebrew UI mock from the program's own output; never type it.** A formatter that emits
+   RTL text inserts invisible directional marks (an LRM, U+200E, after every Hebrew label, say).
+   A hand-typed mock loses them and renders differently from the product: measured, `⚡ מהירות: 5.4MB/s`
+   displayed as `⚡ 5.4 :מהירותMB/s`, and `(03:45)` came out as `)03:45(`. Paste the bytes and prove
+   equality with a `repr()` diff in the same commit.
+2. **A line whose first strong character is Hebrew reads right-to-left, so its trailing punctuation
+   is displayed at the left end.** Start such a line with something neutral (an emoji, a dash, a
+   number) or move the mark into the middle. The linter reports this as `rtl-punctuation`.
+3. **Never put Hebrew — or a flag emoji — inside a badge URL.** shields.io sizes a label with its own
+   font measurement and force-fits it with `textLength` (the "Hebrew UI" badge: 79px of forced width
+   for a 46px string), and Windows has no glyph for a regional-indicator flag, so `🇮🇱` renders as
+   "IL". Describe the feature in ASCII: `UI-Hebrew_RTL`.
+4. **Hebrew inside a closed ASCII box or a column-padded block drifts.** Glyph widths are not one
+   cell (a moon emoji measured 17.0px against 8.17px). Drop the frame, or pad by measured width.
+5. **Links to Hebrew headings arrive percent-encoded** (`#%D7%94...`); decode before comparing (the
+   linter does), and prefer an explicit `<a id="plain-ascii"></a>` anchor over trusting the slug of a
+   heading that mixes Hebrew, Latin and emoji.
+6. **A Hebrew document of its own (`README-he.md`) needs its own direction**: wrap the body in
+   `<div dir="rtl">` where the host honors that attribute, leave code blocks and commands as literal
+   LTR text, and keep one file per language rather than mixing both in one page.
 
 ## Verification
 

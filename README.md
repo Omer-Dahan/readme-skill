@@ -93,8 +93,11 @@ order — one template (`skills/github-readme-authoring/templates/readme-house-s
 
 ### 🧹 Self-Linting
 `skills/github-readme-authoring/scripts/check_readme.py` catches dead anchors, machine-local
-paths, placeholder tokens, unhedged counts, unbacked superlatives, and a license badge with no
-matching `LICENSE` file.
+paths, placeholder tokens, unhedged counts, two test counts that disagree (or a `--tests
+<measured>` mismatch), unbacked superlatives, a license badge with no matching `LICENSE` file,
+a comment line a text sweep joined inside a fenced code block, Hebrew mixed with digits or Latin
+with no directional mark, an ASCII box or badge holding a glyph that isn't one monospace cell, and
+a stretched or flag-emoji badge label.
 
 </td>
 </tr>
@@ -139,8 +142,9 @@ Agent, Claude Code, or a human following it by hand all qualify.
 <td width="33%" valign="top">
 
 ### 🪤 Documented Pitfalls Library
-Eleven named failure modes in `SKILL.md` — backwards config docs, drifting counts, unbacked
-superlatives — each tied to a real cause, not a style guess.
+Seventeen named failure modes in `SKILL.md` — backwards config docs, drifting counts, unbacked
+superlatives, text sweeps that merge lines inside code fences, hand-typed Hebrew mocks — each
+tied to a real cause, not a style guess.
 
 </td>
 </tr>
@@ -174,13 +178,14 @@ with the commit hash and the exact corrections made.
 ## 🧠 How It Works
 
 The skill is a procedure, not a generator: `skills/github-readme-authoring/SKILL.md` walks
-an agent through seven steps — recon the repo into a fact inventory, pick the doc language,
+an agent through eight steps — recon the repo into a fact inventory, pick the doc language,
 draft from the template, build the configuration matrix from the config loader, self-lint,
-hand the draft to an independent verifier, then deliver a docs-only commit.
+measure the rendered page for Hebrew/emoji/badge defects the lint can't see, hand the draft
+to an independent verifier, then deliver a docs-only commit.
 
 ```
-repo files ──▶ fact inventory ──▶ draft (template) ──▶ check_readme.py ──▶ independent model ──▶ commit
-                (file:line each)                         (lint, exit 0)      (fact re-check)
+repo files ──▶ fact inventory ──▶ draft (template) ──▶ check_readme.py ──▶ render check ──▶ independent model ──▶ commit
+                (file:line each)                         (lint, exit 0)    (measure page)      (fact re-check)
 ```
 
 ---
@@ -231,12 +236,16 @@ Two test files cover the skill's one script from different angles:
 
 - **`tests/test_check_readme.py`** imports `check_readme.py` directly and exercises it against
   a known-bad README (dead anchor, local path, placeholder token, license badge with no
-  `LICENSE` file) and a clean one, asserting zero findings on the clean case. It also unit-tests
-  the slugifier (including the emoji variation-selector quirk) and the superlative/count regexes
-  directly.
+  `LICENSE` file) and a clean one, asserting zero findings on the clean case. It also covers the
+  fenced-code and rendering checks — a comment line a sweep merged, a shields.io badge with a flag
+  emoji or a Hebrew label, a closed ASCII box with an emoji (and a directory tree that must *not*
+  be flagged), Hebrew mixed with digits with and without a directional mark, a Hebrew line's
+  trailing punctuation, two disagreeing test counts, a `--tests` mismatch, and a link to a
+  percent-encoded Hebrew heading — plus unit tests for the slugifier (including the emoji
+  variation-selector quirk) and the superlative/count regexes directly.
 - **`tests/test_shipped_docs.py`** is the regression test that would have caught a real bug:
   it runs `check_readme.py` against every markdown file this repo actually ships — `README.md`,
-  the two `references/` docs, `SKILL.md`, and the README template (with its outer ```` ``` ````
+  the three `references/` docs, `SKILL.md`, and the README template (with its outer ```` ``` ````
   fence stripped so the anchors inside it are actually linted, not skipped as "inside a code
   block") — and asserts each has zero findings, or only the specific findings that are expected
   and named as such (e.g. `SKILL.md`'s Pitfalls section intentionally names forbidden tokens as
