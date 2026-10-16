@@ -95,9 +95,10 @@ order — one template (`skills/github-readme-authoring/templates/readme-house-s
 `skills/github-readme-authoring/scripts/check_readme.py` catches dead anchors, machine-local
 paths, placeholder tokens, unhedged counts, two test counts that disagree (or a `--tests
 <measured>` mismatch), unbacked superlatives, a license badge with no matching `LICENSE` file,
-a comment line a text sweep joined inside a fenced code block, Hebrew mixed with digits or Latin
-with no directional mark, an ASCII box or badge holding a glyph that isn't one monospace cell, and
-a stretched or flag-emoji badge label.
+a comment line a text sweep joined inside a fenced code block, a `;` inside a ```mermaid fence that
+aborts the diagram's parse, Hebrew mixed with digits or Latin with no directional mark, an ASCII
+box or badge holding a glyph that isn't one monospace cell, and a stretched or flag-emoji badge
+label.
 
 </td>
 </tr>
@@ -142,9 +143,9 @@ Agent, Claude Code, or a human following it by hand all qualify.
 <td width="33%" valign="top">
 
 ### 🪤 Documented Pitfalls Library
-Seventeen named failure modes in `SKILL.md` — backwards config docs, drifting counts, unbacked
-superlatives, text sweeps that merge lines inside code fences, hand-typed Hebrew mocks — each
-tied to a real cause, not a style guess.
+Eighteen named failure modes in `SKILL.md` — backwards config docs, drifting counts, unbacked
+superlatives, text sweeps that merge lines inside code fences, hand-typed Hebrew mocks, mermaid
+diagrams that fail to parse — each tied to a real cause, not a style guess.
 
 </td>
 </tr>

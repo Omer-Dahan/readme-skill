@@ -8,7 +8,9 @@ Three families of checks:
    unbacked superlatives, unhedged counts, and two test counts that disagree (count claims
    are read inside fenced code too, where counts usually live).
 2. Fenced code, where a documentation sweep corrupts text silently: a comment line that
-   carries two comment markers was two lines joined by a repo-wide dash replacement.
+   carries two comment markers was two lines joined by a repo-wide dash replacement, and a
+   `;` inside a ```mermaid fence, which is a statement separator in `stateDiagram-v2` and
+   aborts the whole diagram's parse.
 3. Rendering, the defects a text diff cannot show: Hebrew mixed with digits or Latin and
    no directional mark (the bidi algorithm reorders the numbers around it on the page),
    an ASCII box holding emoji or Hebrew (glyph widths are not one monospace cell, so the
@@ -129,9 +131,11 @@ def main(argv: list[str] | None = None) -> int:
         seen[base] = count + 1
 
     fence = False
+    fence_lang = ""
     for n, line in enumerate(lines, start=1):
         if line.strip().startswith("```"):
             fence = not fence
+            fence_lang = line.strip()[3:].strip().lower() if fence else ""
             continue
 
         # -- rendering checks: they apply inside and outside fenced code --
@@ -160,6 +164,14 @@ def main(argv: list[str] | None = None) -> int:
             )
 
         if fence:
+            if fence_lang == "mermaid" and ";" in line:
+                add(
+                    "mermaid-semicolon",
+                    n,
+                    "';' inside a mermaid block: it is a statement separator in stateDiagram-v2 and "
+                    "breaks the diagram, so GitHub shows 'Unable to render rich display' - use a "
+                    "comma or a dash instead",
+                )
             if MERGED_COMMENT_RE.search(line):
                 add(
                     "merged-line",

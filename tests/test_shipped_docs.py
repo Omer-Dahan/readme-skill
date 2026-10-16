@@ -59,8 +59,8 @@ def test_skill_md_has_only_the_known_self_referential_findings() -> None:
     """
     expected = {
         ("placeholder", 72),  # names the forbidden `TODO` placeholder token
-        ("local-path", 119),  # names the forbidden /tmp and /home/<user> example paths
-        ("superlative", 129),  # lists the forbidden superlative words
+        ("local-path", 122),  # names the forbidden /tmp and /home/<user> example paths
+        ("superlative", 132),  # lists the forbidden superlative words
     }
     actual = {_kind_and_line(f) for f in _lint(SKILL_DIR / "SKILL.md")}
     assert actual == expected

@@ -83,8 +83,11 @@ Makefile scripts/* tests/                                               # the co
    what the lint cannot see: for every block holding Hebrew, emoji, or an ASCII box, read the
    per-character x positions and confirm the visual order matches the intended text and that all
    borders share one x coordinate; read each badge's rendered width against the string's natural
-   width. *Done when* the measurements are clean — a Hebrew block that looks correct in the editor
-   is routinely scrambled on the page (measured: `⚡ מהירות: 5.4MB/s` displaying as `⚡ 5.4 :מהירותMB/s`).
+   width; and push every `mermaid` diagram through the renderer's own parser
+   (`references/render-check.md`), because a diagram that fails to parse shows the reader a raw
+   error box instead of the diagram. *Done when* the measurements are clean — a Hebrew block that
+   looks correct in the editor is routinely scrambled on the page (measured: `⚡ מהירות: 5.4MB/s`
+   displaying as `⚡ 5.4 :מהירותMB/s`).
 7. **Independent verification.** Hand the README plus `references/verification-brief.md` to a
    **different model than the author**. Fix every "no evidence" finding, then re-verify. *Done when*
    the verifier returns no unsupported claim — including claims the README omits that the code exposes.
@@ -160,6 +163,12 @@ Makefile scripts/* tests/                                               # the co
 17. **Hebrew is a rendering problem, not only a translation problem.** Every rule and every measured
     failure is in the "Hebrew and RTL content" section below; read it before writing a page that
     contains a single Hebrew word, and measure the page afterwards.
+18. **A diagram is code - parse it, do not eyeball it.** A single stray character can leave the
+    reader looking at a raw error box: measured, a `;` inside a `stateDiagram-v2` description is a
+    statement separator that aborts the parse ("Unable to render rich display - Parse error on line
+    10"), while `&` and `->` in the same descriptions are fine. Push every fenced diagram through
+    `mermaid.parse()` before publishing; `scripts/check_readme.py` flags the semicolon case as
+    `mermaid-semicolon`.
 
 ## Hebrew and RTL content (rules from measured failures)
 

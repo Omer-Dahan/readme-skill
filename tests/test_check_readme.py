@@ -183,6 +183,30 @@ def test_merged_comment_line_in_fence_is_flagged(repo, capsys):
     assert "merged-line" in capsys.readouterr().out
 
 
+def test_mermaid_semicolon_is_flagged(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n```mermaid\nstateDiagram-v2\n  A --> B: SSRF guard; direct-link engine\n```\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "mermaid-semicolon" in capsys.readouterr().out
+
+
+def test_semicolon_in_bash_fence_is_not_flagged_as_mermaid(repo, capsys):
+    readme = repo / "README.md"
+    readme.write_text(
+        "# Demo\n\n```bash\necho hello; echo world\n```\n",
+        encoding="utf-8",
+    )
+
+    check_readme.main([str(readme), "--repo", str(repo)])
+
+    assert "mermaid-semicolon" not in capsys.readouterr().out
+
+
 def test_badge_with_flag_emoji_is_flagged(repo, capsys):
     readme = repo / "README.md"
     readme.write_text(

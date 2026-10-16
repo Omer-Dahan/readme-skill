@@ -47,6 +47,40 @@ equivalent to this in its devtools console or scripted browser:
 
 The line list is the evidence: keep the raw output in the report.
 
+## Mermaid diagrams (a diagram is code; parse it)
+
+A diagram that fails to parse is worse than no diagram: the reader gets a raw error box. GitHub
+shows it in the DOM as a sibling of the `<pre lang="mermaid">` element:
+
+```
+Unable to render rich display
+Parse error on line 10: ...: SSRF guard; direct-link engine also do
+```
+
+Validate before publishing by loading the renderer and parsing each block with it (a blank page
+plus the CDN build is enough):
+
+```js
+const inject = (src) => new Promise((res, rej) => {
+  const s = document.createElement('script'); s.src = src;
+  s.onload = () => res(true); s.onerror = () => rej(new Error('load fail'));
+  document.head.appendChild(s);
+});
+await inject('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js');
+try {
+  await mermaid.parse(block);
+  console.log('OK');
+} catch (e) {
+  console.log('FAIL -> ' + String(e.message).replace(/\n/g, ' | ').slice(0, 220));
+}
+```
+
+Measured failure (media-bot-v2 README, 17/10/2026): one `;` inside a `stateDiagram-v2` description
+(`SSRF guard; direct-link engine ...`) aborted the whole block at line 10 - a semicolon is a
+statement separator in that diagram type. Replacing it with a comma made the block parse. The same
+block's `&` characters and `->` inside descriptions parsed fine, so do not "clean up" those; test
+the actual variant instead of guessing which character is at fault.
+
 ## Result of the round that produced this reference
 
 A README source looked correct and the lint was clean. The rendered page showed:
